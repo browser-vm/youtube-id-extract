@@ -1,6 +1,7 @@
 import re
 import modal
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import RedirectResponse
 
 # Initialize FastAPI app
 web_app = FastAPI(
@@ -8,13 +9,20 @@ web_app = FastAPI(
     description="A simple API to parse video IDs from various YouTube URL formats."
 )
 
-# Initialize Modal App (Note: 'Stub' was renamed to 'App' in newer Modal versions)
+# Initialize Modal App
 app = modal.App("youtube-id-extractor")
 
-# Regex to capture the 11-character YouTube video ID across different URL structures
+# Regex to capture the 11-character YouTube video ID
 YOUTUBE_REGEX = re.compile(
     r'(?:v=|\/v\/|\/embed\/|\/shorts\/|\.be\/)([a-zA-Z0-9_-]{11})'
 )
+
+@web_app.get("/", include_in_schema=False)
+def redirect_to_docs():
+    """
+    Redirects the root URL directly to the interactive Swagger UI documentation.
+    """
+    return RedirectResponse(url="/docs")
 
 @web_app.get("/extract")
 def extract_id(url: str = Query(..., description="The YouTube URL to parse")):
